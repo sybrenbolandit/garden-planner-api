@@ -12,7 +12,7 @@ install:
   - heroku plugins:install @heroku-cli/plugin-container-registry
 
 script:
-  - ./gradlew build
+  - ./gradlew stage
 
 cache:
   directories:
