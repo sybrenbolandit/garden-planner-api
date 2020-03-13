@@ -26,4 +26,4 @@ before_cache:
 deploy:
   provider: script
   script:
-    heroku container:release web --app $HEROKU_APP_NAME
+    heroku container:release web --app gardenplanner-api
