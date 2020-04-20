@@ -10,15 +10,21 @@ install:
   - wget -qO- https://toolbelt.heroku.com/install.sh | sh
   - docker login --username _ --password=$HEROKU_API_KEY registry.heroku.com
   - heroku plugins:install @heroku-cli/plugin-container-registry
+  - export TRIVY_VERSION=$(curl --silent "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+  - wget https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
+  - tar zxvf trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
 
 script:
   - ./gradlew stage
   - heroku container:push web --app gardenplanner-api
+  - ./trivy --exit-code 0 --severity HIGH --no-progress registry.heroku.com/gardenplanner-api/web
+  - ./trivy --exit-code 1 --severity CRITICAL --no-progress registry.heroku.com/gardenplanner-api/web
 
 cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.cache/trivy
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
